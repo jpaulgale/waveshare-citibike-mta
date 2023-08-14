@@ -4,6 +4,7 @@ import json
 import time
 import os
 import glob
+from telegram import Bot
 from SNPCitibikeChecker import update_stations
 from SNPfTrainChecker import create_arrival_json
 
@@ -15,6 +16,12 @@ def load_json(file_path):
 
 def draw_text(draw, x, y, text, font, fill='black'):
     draw.text((x, y), text, font=font, fill=fill)
+
+def send_telegram_message(message):
+    bot_token = '6526779341:AAH18zjhXOWELppO8G99DVmeDQDpt8t1d3Y'
+    chat_id = '6439202731'
+    bot = Bot(token=bot_token)
+    bot.send_message(chat_id=chat_id, text=message)
 
 def delete_old_frames(directory, keep=5):
     # Find all PNG files in the directory ending with "_snp-frame.png"
@@ -28,15 +35,31 @@ def delete_old_frames(directory, keep=5):
         os.remove(file)
 
 # Load template image 
-template = Image.open('/home/pi/SNP_frame-image-generator/source_files/template_snp-frame.png') 
+try:
+    template = Image.open('/home/pi/SNP_frame-image-generator/source_files/template_snp-frame.png')
+except FileNotFoundError as e:
+    send_telegram_message(f"File not found: template_snp-frame.png")
+except Exception as e:
+    send_telegram_message(f"Failed to load template_snp-frame.png: {e}")
 
 update_stations()
-with open('/home/pi/SNP_frame-image-generator/latestJSONs/stations.json') as f:
-  stations = json.load(f)
+try:
+    with open('/home/pi/SNP_frame-image-generator/latestJSONs/stations.json') as f:
+      stations = json.load(f)
+except FileNotFoundError as e:
+        send_telegram_message(f"File not found: stations.json")
+except Exception as e:
+    send_telegram_message(f"Failed to load stations.json: {e}")
+
 
 create_arrival_json()
-with open('/home/pi/SNP_frame-image-generator/latestJSONs/arrival_times.json') as f:
-  FTrainArrivalTimes = json.load(f)
+try:
+    with open('/home/pi/SNP_frame-image-generator/latestJSONs/arrival_times.json') as f:
+        FTrainArrivalTimes = json.load(f)
+except FileNotFoundError as e:
+        send_telegram_message(f"File not found: arrival_times.json")
+except Exception as e:
+    send_telegram_message(f"Failed to load arrival_times.json: {e}")
 
 uptown_times = FTrainArrivalTimes['uptown']
 downtown_times = FTrainArrivalTimes['downtown']

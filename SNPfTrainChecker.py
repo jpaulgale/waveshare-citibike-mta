@@ -1,6 +1,13 @@
 import datetime
 from nyct_gtfs import NYCTFeed
 import json
+from telegram import Bot
+
+def send_telegram_message(message):
+    bot_token = '6526779341:AAH18zjhXOWELppO8G99DVmeDQDpt8t1d3Y'
+    chat_id = '6439202731'
+    bot = Bot(token=bot_token)
+    bot.send_message(chat_id=chat_id, text=message)
 
 def get_next_arrivals(feed, stop_id):
     trains = feed.trips
@@ -50,8 +57,14 @@ def create_arrival_json():
         # Write the times to a JSON file
         with open('/home/pi/SNP_frame-image-generator/latestJSONs/arrival_times.json', 'w') as f:
             json.dump({'uptown': uptown_times[:3] + [""] * (3 - len(uptown_times)), 'downtown': downtown_times[:3] + [""] * (3 - len(downtown_times))}, f)
+    except FileNotFoundError as e:
+        error_message = f"File not found: {str(e)}"
+        print(error_message)
+        send_telegram_message(error_message)
     except Exception as e:
-        print(f"An error occurred: {str(e)}")
+        error_message = f"An error occurred: {str(e)}"
+        print(error_message)
+        send_telegram_message(error_message)
         # Return default values in case of error
         with open('/home/pi/SNP_frame-image-generator/latestJSONs/arrival_times.json', 'w') as f:
             json.dump({'uptown': ["N/A", "", ""], 'downtown': ["N/A", "", ""]}, f)

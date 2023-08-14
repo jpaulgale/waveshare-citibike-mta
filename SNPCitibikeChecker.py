@@ -1,9 +1,16 @@
 import requests
 import time
 import json
+from telegram import Bot
 
 start_time = time.time()
 
+def send_telegram_message(message):
+    bot_token = '6526779341:AAH18zjhXOWELppO8G99DVmeDQDpt8t1d3Y'
+    chat_id = '6439202731'
+    bot = Bot(token=bot_token)
+    bot.send_message(chat_id=chat_id, text=message)
+    
 def update_stations():
     # Station IDs and names
     all_stations = []
@@ -45,11 +52,18 @@ def update_stations():
 
             all_stations.append(station)
 
-        with open('/home/pi/SNP_frame-image-generator/latestJSONs/stations.json', 'w') as f:
-            json.dump(all_stations, f)
+        try:
+            with open('/home/pi/SNP_frame-image-generator/latestJSONs/stations.json', 'w') as f:
+                json.dump(all_stations, f)
+        except FileNotFoundError as e:
+            send_telegram_message(f"File not found: stations.json")
+        except Exception as e:
+            send_telegram_message(f"Failed to write to stations.json: {e}")
 
     except Exception as e:
-        print(f"Error occurred: {str(e)}")
+        error_message = f"Error occurred: {str(e)}"
+        print(error_message)
+        send_telegram_message(error_message)
         error_data = []
         for i in range(len(station_ids)):
             station_id = station_ids[i]
@@ -61,8 +75,9 @@ def update_stations():
                 "ebikes": "N/A"
             }
             error_data.append(error_station)
-            
+
         with open('/home/pi/SNP_frame-image-generator/latestJSONs/stations.json', 'w') as f:
             json.dump(error_data, f)
+
 
 update_stations()
