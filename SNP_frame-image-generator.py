@@ -107,3 +107,4 @@ print(f"Saved frame to {output_file}")
 end_time = time.time()
 elapsed_time = end_time - start_time
 print(f"Execution time: {elapsed_time:.4f} seconds")
+asyncio.run(send_telegram_message(f"Test push successful 08-14 1254pm"))
