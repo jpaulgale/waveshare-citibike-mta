@@ -2,14 +2,15 @@ import requests
 import time
 import json
 from telegram import Bot
+import asyncio
 
 start_time = time.time()
 
-def send_telegram_message(message):
+async def send_telegram_message(message):
     bot_token = '6526779341:AAH18zjhXOWELppO8G99DVmeDQDpt8t1d3Y'
     chat_id = '6439202731'
     bot = Bot(token=bot_token)
-    bot.send_message(chat_id=chat_id, text=message)
+    await bot.send_message(chat_id=chat_id, text=message)
     
 def update_stations():
     # Station IDs and names
@@ -56,14 +57,14 @@ def update_stations():
             with open('/home/pi/SNP_frame-image-generator/latestJSONs/stations.json', 'w') as f:
                 json.dump(all_stations, f)
         except FileNotFoundError as e:
-            send_telegram_message(f"File not found: stations.json")
+            asyncio.run(send_telegram_message(f"File not found: stations.json"))
         except Exception as e:
-            send_telegram_message(f"Failed to write to stations.json: {e}")
+            asyncio.run(send_telegram_message(f"Failed to write to stations.json: {e}"))
 
     except Exception as e:
         error_message = f"Error occurred: {str(e)}"
         print(error_message)
-        send_telegram_message(error_message)
+        asyncio.run(send_telegram_message(error_message))
         error_data = []
         for i in range(len(station_ids)):
             station_id = station_ids[i]

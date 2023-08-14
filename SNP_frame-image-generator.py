@@ -5,6 +5,7 @@ import time
 import os
 import glob
 from telegram import Bot
+import asyncio
 from SNPCitibikeChecker import update_stations
 from SNPfTrainChecker import create_arrival_json
 
@@ -17,11 +18,11 @@ def load_json(file_path):
 def draw_text(draw, x, y, text, font, fill='black'):
     draw.text((x, y), text, font=font, fill=fill)
 
-def send_telegram_message(message):
+async def send_telegram_message(message):
     bot_token = '6526779341:AAH18zjhXOWELppO8G99DVmeDQDpt8t1d3Y'
     chat_id = '6439202731'
     bot = Bot(token=bot_token)
-    bot.send_message(chat_id=chat_id, text=message)
+    await bot.send_message(chat_id=chat_id, text=message)
 
 def delete_old_frames(directory, keep=5):
     # Find all PNG files in the directory ending with "_snp-frame.png"
@@ -38,18 +39,18 @@ def delete_old_frames(directory, keep=5):
 try:
     template = Image.open('/home/pi/SNP_frame-image-generator/source_files/template_snp-frame.png')
 except FileNotFoundError as e:
-    send_telegram_message(f"File not found: template_snp-frame.png")
+    asyncio.run(send_telegram_message(f"File not found: template_snp-frame.png"))
 except Exception as e:
-    send_telegram_message(f"Failed to load template_snp-frame.png: {e}")
+    asyncio.run(send_telegram_message(f"Failed to load template_snp-frame.png: {e}"))
 
 update_stations()
 try:
     with open('/home/pi/SNP_frame-image-generator/latestJSONs/stations.json') as f:
       stations = json.load(f)
 except FileNotFoundError as e:
-        send_telegram_message(f"File not found: stations.json")
+    asyncio.run(send_telegram_message(f"File not found: stations.json"))
 except Exception as e:
-    send_telegram_message(f"Failed to load stations.json: {e}")
+    asyncio.run(send_telegram_message(f"Failed to load stations.json: {e}"))
 
 
 create_arrival_json()
@@ -57,9 +58,9 @@ try:
     with open('/home/pi/SNP_frame-image-generator/latestJSONs/arrival_times.json') as f:
         FTrainArrivalTimes = json.load(f)
 except FileNotFoundError as e:
-        send_telegram_message(f"File not found: arrival_times.json")
+    asyncio.run(send_telegram_message(f"File not found: arrival_times.json"))
 except Exception as e:
-    send_telegram_message(f"Failed to load arrival_times.json: {e}")
+    asyncio.run(send_telegram_message(f"Failed to load arrival_times.json: {e}"))
 
 uptown_times = FTrainArrivalTimes['uptown']
 downtown_times = FTrainArrivalTimes['downtown']
@@ -106,3 +107,4 @@ print(f"Saved frame to {output_file}")
 end_time = time.time()
 elapsed_time = end_time - start_time
 print(f"Execution time: {elapsed_time:.4f} seconds")
+asyncio.run(send_telegram_message(f"Execution time: {elapsed_time:.4f} seconds"))
