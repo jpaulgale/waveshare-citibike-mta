@@ -15,3 +15,5 @@ To make it more resilient, if either Request from either the citibikechecker or 
 **SNP-display-latest-frame.py** -- this takes the latest file in /latest_images and actually displays it on the waveshare screen. because it's an e-ink display, one only needs to push it to the screen and the image will persist if the program is done (and even if the computer or screen were to be unplugged). 
 
 **clear-screen.py** -- does what it says on the tin. refreshes the waveshare e-ink screen so that I don't get any burn-in (not likely, as it can take as many as 10 days to cause burn in on an e-ink screen)
+
+I have set up error message alerts via telegram , and the RPi is set to check this repo approx every hour to pull any new commits.
