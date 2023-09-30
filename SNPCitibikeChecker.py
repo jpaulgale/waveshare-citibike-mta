@@ -22,7 +22,7 @@ def update_stations():
 
     try:
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
-        response = requests.get(station_status_url, headers=headers)
+        response = requests.get(station_status_url, headers=headers, timeout=10)
         response.raise_for_status()  # Raise an exception for non-2xx status codes
         station_status = response.json()
 
@@ -79,6 +79,3 @@ def update_stations():
 
         with open('/home/pi/SNP_frame-image-generator/latestJSONs/stations.json', 'w') as f:
             json.dump(error_data, f)
-
-
-update_stations()
