@@ -99,6 +99,8 @@ draw_text(draw, 145, 435, f"{formatted_now}", smallFont)
 time_str = time.strftime("%Y-%m-%d_%I%M%p")
 output_file = f"/home/pi/SNP_frame-image-generator/latest_images/{time_str}_snp-frame.png"
 
+# Rotate the image 180 degrees
+template = template.rotate(180)
 template.save(output_file)
 
 delete_old_frames('/home/pi/SNP_frame-image-generator/latest_images/')
