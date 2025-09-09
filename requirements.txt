@@ -1,4 +1,6 @@
 nyct_gtfs==1.2.0
 Pillow==10.0.0
+python-dotenv==1.0.0
+python-telegram-bot==20.7
 Requests==2.31.0
 spidev==3.6

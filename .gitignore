@@ -1,20 +1,21 @@
-# Temporary files
-*~
-*.swp
-.DS_Store
-
-# Compiled files or build artifacts
-*.pyc
-__pycache__/
-*.pyo
-*.pyd
-dist/
-build/
-
-# Virtual environments
-venv/
-env/
-
-# Credentials and sensitive information
+# Environment variables
 .env
-secrets.ini
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

@@ -1,28 +1,29 @@
 import requests
 import time
 import json
-from telegram import Bot
 import asyncio
+from telegram_notifier import send_telegram_message
 
 start_time = time.time()
 
-async def send_telegram_message(message):
-    bot_token = '6526779341:AAH18zjhXOWELppO8G99DVmeDQDpt8t1d3Y'
-    chat_id = '6439202731'
-    bot = Bot(token=bot_token)
-    await bot.send_message(chat_id=chat_id, text=message)
-    
+
 def update_stations():
     # Station IDs and names
     all_stations = []
-    station_ids = ['c71cca54-17f6-42bc-ba94-3f5bd9c70197', 'c38e2cfc-04e6-419c-8bf8-d8713ccf6ea7']
-    station_names = ['Bridge St & Water St', 'Bridge St & York St']
+    station_ids = [
+        "c71cca54-17f6-42bc-ba94-3f5bd9c70197",
+        "c38e2cfc-04e6-419c-8bf8-d8713ccf6ea7",
+    ]
+    station_names = [
+        "Bridge St & Front St",
+        "Bridge St & York St",
+    ]
 
-    station_status_url = 'https://gbfs.citibikenyc.com/gbfs/en/station_status.json?fields=station_id,num_bikes_available,num_ebikes_available'
+    station_status_url = "https://gbfs.lyft.com/gbfs/2.3/bkn/en/station_status.json"
 
     try:
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'}
-        response = requests.get(station_status_url, headers=headers)
+        headers = {"User-Agent": "waveshare-citibike-mta/1.0"}
+        response = requests.get(station_status_url, headers=headers, timeout=10)
         response.raise_for_status()  # Raise an exception for non-2xx status codes
         station_status = response.json()
 
@@ -32,8 +33,8 @@ def update_stations():
 
             # Find station data
             station_data = None
-            for station in station_status['data']['stations']:
-                if station['station_id'] == station_id:
+            for station in station_status["data"]["stations"]:
+                if station["station_id"] == station_id:
                     station_data = station
                     break
 
@@ -41,20 +42,29 @@ def update_stations():
                 print(f"Station {station_id} not found")
                 continue
 
-            ebike_count = station_data['num_ebikes_available']
-            classicbike_count = station_data['num_bikes_available']
+            # Parse vehicle types to get accurate counts
+            # And set both to N/A as default in case gbfs structure changes in future
+            classicbike_count = "N/A"
+            ebike_count = "N/A"
+
+            if "vehicle_types_available" in station_data:
+                for vehicle_type in station_data["vehicle_types_available"]:
+                    if vehicle_type["vehicle_type_id"] == "1":  # Classic bikes
+                        classicbike_count = vehicle_type["count"]
+                    elif vehicle_type["vehicle_type_id"] == "2":  # E-bikes
+                        ebike_count = vehicle_type["count"]
 
             station = {
                 "id": station_id,
                 "name": station_name,
                 "classic": classicbike_count,
-                "ebikes": ebike_count
+                "ebikes": ebike_count,
             }
 
             all_stations.append(station)
 
         try:
-            with open('/home/pi/SNP_frame-image-generator/latestJSONs/stations.json', 'w') as f:
+            with open("latestJSONs/stations.json", "w") as f:
                 json.dump(all_stations, f)
         except FileNotFoundError as e:
             asyncio.run(send_telegram_message(f"File not found: stations.json"))
@@ -73,12 +83,9 @@ def update_stations():
                 "id": station_id,
                 "name": station_name,
                 "classic": "N/A",
-                "ebikes": "N/A"
+                "ebikes": "N/A",
             }
             error_data.append(error_station)
 
-        with open('/home/pi/SNP_frame-image-generator/latestJSONs/stations.json', 'w') as f:
+        with open("latestJSONs/stations.json", "w") as f:
             json.dump(error_data, f)
-
-
-update_stations()

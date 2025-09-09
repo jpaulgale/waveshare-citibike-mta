@@ -4,10 +4,10 @@ import json
 import time
 import os
 import glob
-from telegram import Bot
 import asyncio
 from SNPCitibikeChecker import update_stations
 from SNPfTrainChecker import create_arrival_json
+from telegram_notifier import send_telegram_message
 
 start_time = time.time()
 
@@ -17,12 +17,6 @@ def load_json(file_path):
 
 def draw_text(draw, x, y, text, font, fill='black'):
     draw.text((x, y), text, font=font, fill=fill)
-
-async def send_telegram_message(message):
-    bot_token = '6526779341:AAH18zjhXOWELppO8G99DVmeDQDpt8t1d3Y'
-    chat_id = '6439202731'
-    bot = Bot(token=bot_token)
-    await bot.send_message(chat_id=chat_id, text=message)
 
 def delete_old_frames(directory, keep=5):
     # Find all PNG files in the directory ending with "_snp-frame.png"
@@ -37,7 +31,7 @@ def delete_old_frames(directory, keep=5):
 
 # Load template image 
 try:
-    template = Image.open('/home/pi/SNP_frame-image-generator/source_files/template_snp-frame.png')
+    template = Image.open('source_files/template_snp-frame.png')
 except FileNotFoundError as e:
     asyncio.run(send_telegram_message(f"File not found: template_snp-frame.png"))
 except Exception as e:
@@ -45,7 +39,7 @@ except Exception as e:
 
 update_stations()
 try:
-    with open('/home/pi/SNP_frame-image-generator/latestJSONs/stations.json') as f:
+    with open('latestJSONs/stations.json') as f:
       stations = json.load(f)
 except FileNotFoundError as e:
     asyncio.run(send_telegram_message(f"File not found: stations.json"))
@@ -55,7 +49,7 @@ except Exception as e:
 
 create_arrival_json()
 try:
-    with open('/home/pi/SNP_frame-image-generator/latestJSONs/arrival_times.json') as f:
+    with open('latestJSONs/arrival_times.json') as f:
         FTrainArrivalTimes = json.load(f)
 except FileNotFoundError as e:
     asyncio.run(send_telegram_message(f"File not found: arrival_times.json"))
@@ -67,9 +61,9 @@ downtown_times = FTrainArrivalTimes['downtown']
 
 # Add dynamic text
 draw = ImageDraw.Draw(template)
-subwayFont = ImageFont.truetype('/home/pi/SNP_frame-image-generator/source_files/Arial.ttf', 24)
-citibikeFont = ImageFont.truetype('/home/pi/SNP_frame-image-generator/source_files/Arial.ttf', 28) 
-smallFont = ImageFont.truetype('/home/pi/SNP_frame-image-generator/source_files/Arial.ttf', 16)
+subwayFont = ImageFont.truetype('source_files/Arial.ttf', 24)
+citibikeFont = ImageFont.truetype('source_files/Arial.ttf', 28) 
+smallFont = ImageFont.truetype('source_files/Arial.ttf', 16)
 positions = {
   'c38e2cfc-04e6-419c-8bf8-d8713ccf6ea7': {'x': 240, 'y': 310},
   'c71cca54-17f6-42bc-ba94-3f5bd9c70197': {'x': 470, 'y': 310} 
@@ -97,11 +91,11 @@ draw_text(draw, 145, 435, f"{formatted_now}", smallFont)
 
 # Save with timestamp
 time_str = time.strftime("%Y-%m-%d_%I%M%p")
-output_file = f"/home/pi/SNP_frame-image-generator/latest_images/{time_str}_snp-frame.png"
+output_file = f"latest_images/{time_str}_snp-frame.png"
 
 template.save(output_file)
 
-delete_old_frames('/home/pi/SNP_frame-image-generator/latest_images/')
+delete_old_frames('latest_images')
 
 print(f"Saved frame to {output_file}")
 end_time = time.time()
