@@ -1,6 +1,13 @@
 # waveshare-citibike-mta
 NYC Citibike and MTA Subway Alerts For RPi Zero WH + Waveshare 5.83" E-Ink Display
 
+**Image that's generated**:
+
+![2023-07-16_1029PM_snp-frame](https://github.com/jpaulgale/waveshare-citibike-mta/assets/14095721/3afa33c7-447b-4f41-b0b4-0050d31b1e7f)
+
+**Frame (1" deep so I could hide RPi behind it, with a custom white matte, and an on/off switch integrated into micro USB power wire)**:
+![frame](https://github.com/jpaulgale/waveshare-citibike-mta/assets/14095721/900a187d-729b-4163-99f4-832ce5f90def)
+
 **SNPfTrainChecker.py** -- contains the functions that pull the next 5 uptown and downtown train departures from the York St F stop (after ignoring any that come in the next 5 min as the station is 5min away from the location), and writes the latest three to /latestJSONs/arrival_times.json
 - The reason I pull 5 is that I was finding that the gfts (a google protocol for publishing train times, like RSS I guess) would sometimes have blank values, so I gave a buffer of two to be safe
 
